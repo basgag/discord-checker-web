@@ -1,8 +1,8 @@
 import { type PropsWithChildren } from "react";
 
-type TooltipProps = {
+interface TooltipProps {
   text: string;
-};
+}
 
 const Tooltip: React.FC<PropsWithChildren<TooltipProps>> = ({
   children,

@@ -13,12 +13,12 @@ export const snowflakeToMilliseconds = (snowflake: string): number => {
   return Number(snowflake) / 4194304 + DISCORD_EPOCH;
 };
 
-type RequestConfig = {
+interface RequestConfig {
   data?: object;
   token?: string;
   delay?: number;
   method?: "GET" | "POST" | "PUT" | "DELETE";
-};
+}
 
 /**
  * Sends a request to the Discord api with the given data. If a rate limit is encountered, wait and retry.
@@ -27,7 +27,7 @@ type RequestConfig = {
  */
 export async function apiRequest<ReturnType>(
   uri: string,
-  config: RequestConfig
+  config: RequestConfig,
 ): Promise<AxiosResponse<ReturnType> | null> {
   const { data = null, token = null, delay = 0, method = "GET" } = config;
   try {
@@ -60,13 +60,13 @@ export const fetchUser = async (id: string, config: RequestConfig) => {
   return apiRequest<APIUser>(`/users/${id}`, config);
 };
 
-type BillingCountryResponse = {
+interface BillingCountryResponse {
   country_code: string;
-};
+}
 
 export const fetchBillingCountry = async (config: RequestConfig) => {
   return apiRequest<BillingCountryResponse>(
     "/users/@me/billing/country-code",
-    config
+    config,
   );
 };
