@@ -7,7 +7,7 @@ import Link from "next/link";
 const Custom500: React.FC = () => {
   return (
     <>
-      <NextSeo title="Oops! Internal Server Error" />
+      <NextSeo title="Oops! Internal Server Error" noindex={true} />
       <Header />
       <main className="flex h-[calc(100vh-300px)] items-center justify-center text-center">
         <BackgroundGrid />

@@ -1,9 +1,6 @@
-import BackgroundGrid from "~/components/BackgroundGrid";
-import Container from "~/components/Container";
 import { type GetServerSidePropsContext } from "next";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/utils/api";
-import Header from "~/components/Header";
 import { useSession } from "next-auth/react";
 import { FiAlertTriangle, FiCheckCircle, FiStar } from "react-icons/fi";
 

@@ -1,17 +1,48 @@
-import { type ChangeEvent, useState } from "react";
-import { Dialog } from "@headlessui/react";
+import { type ChangeEvent, useMemo, useState } from "react";
+import { Dialog, Switch } from "@headlessui/react";
 import { FiDownload, FiExternalLink } from "react-icons/fi";
 import { type Account } from "~/lib/store";
 import clsx from "clsx";
 import { poppins } from "~/pages/_app";
+import { UserPremiumType } from "discord-api-types/v10";
+import OptionSwitch from "~/components/common/OptionSwitch";
 
-type ExportDialogProps = {
+interface ExportDialogProps {
   accounts: Account[];
-};
+}
 
 const ExportDialog: React.FC<ExportDialogProps> = ({ accounts }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(0);
+  const [isVerifiedOnly, setVerifiedOnly] = useState(false);
+  const [isNitroOnly, setNitroOnly] = useState(false);
+
+  const verifiedFilter = (account: Account) => {
+    if (!isVerifiedOnly) {
+      return true;
+    }
+
+    return account.user.verified;
+  };
+
+  const nitroFilter = (account: Account) => {
+    if (!isNitroOnly) {
+      return true;
+    }
+
+    return (
+      account.user.premium_type !== UserPremiumType.None &&
+      account.user.premium_type !== undefined
+    );
+  };
+
+  const combinedFilter = (account: Account) => {
+    return verifiedFilter(account) && nitroFilter(account);
+  };
+
+  const filteredAccounts = useMemo(() => {
+    return accounts.filter(combinedFilter);
+  }, [accounts, isVerifiedOnly, isNitroOnly]);
 
   const handleSelectOption = (event: ChangeEvent<HTMLSelectElement>) => {
     setSelectedOption(Number(event.target.value));
@@ -23,7 +54,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ accounts }) => {
       return;
     }
 
-    const content = encodeURIComponent(option.generator(accounts));
+    const content = encodeURIComponent(option.generator(filteredAccounts));
     const filename = `tokens-${Date.now()}.${option.extension}`;
 
     const href = `data:text/plain;charset=utf-8,${content}`;
@@ -120,16 +151,33 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ accounts }) => {
             <div className="py-2">
               <h2 className="mb-1 font-medium">Preview</h2>
               <pre className="slim-scrollbar max-h-96 overflow-y-auto overflow-x-hidden text-ellipsis rounded border border-gray-700 bg-gray-800 p-2 text-xs">
-                {options[selectedOption]?.generator(accounts.slice(0, 5)) ??
-                  "No preview available."}
+                {options[selectedOption]!.generator(
+                  filteredAccounts.slice(0, 5),
+                ) || "No preview available."}
               </pre>
             </div>
 
             <hr className="my-2 border-gray-700" />
 
+            <div className="my-6 space-y-4">
+              <OptionSwitch
+                name="Verified Accounts"
+                description="Filter out unverified accounts"
+                condition={isVerifiedOnly}
+                stateSetter={() => setVerifiedOnly(!isVerifiedOnly)}
+              />
+              <OptionSwitch
+                name="Nitro Accounts"
+                description="Filter out accounts without Discord Nitro"
+                condition={isNitroOnly}
+                stateSetter={() => setNitroOnly(!isNitroOnly)}
+              />
+            </div>
+
             <button
-              className="flex items-center rounded bg-blurple px-2 py-1.5 font-medium outline-none transition duration-150 hover:bg-blurple-dark"
+              className="flex items-center rounded bg-blurple px-2 py-1.5 font-medium outline-none transition duration-150 hover:bg-blurple-dark disabled:opacity-50"
               onClick={handleGenerate}
+              disabled={filteredAccounts.length === 0}
             >
               <FiDownload className="mr-2" size={20} />
               Download

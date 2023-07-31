@@ -1,9 +1,9 @@
 import type { PropsWithChildren } from "react";
 import clsx from "clsx";
 
-type ContainerProps = {
+interface ContainerProps {
   className?: string;
-};
+}
 
 const Container: React.FC<PropsWithChildren<ContainerProps>> = ({
   children,

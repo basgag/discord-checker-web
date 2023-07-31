@@ -4,9 +4,9 @@ import {
   ImageFormat,
   type UserAvatarFormat,
 } from "discord-api-types/v10";
-import { useState } from "react";
+import { type SyntheticEvent, useState } from "react";
 
-type DiscordAvatarProps = {
+interface DiscordAvatarProps {
   user: {
     username: APIUser["username"];
     id: APIUser["id"];
@@ -15,14 +15,14 @@ type DiscordAvatarProps = {
   };
   size?: number;
   format?: UserAvatarFormat;
-};
+}
 
 const DiscordAvatar: React.FC<DiscordAvatarProps> = ({
   user,
   format = ImageFormat.WebP,
   size = 64,
 }) => {
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<SyntheticEvent | null>(null);
 
   const CDN_URL = "https://cdn.discordapp.com";
 
@@ -36,7 +36,7 @@ const DiscordAvatar: React.FC<DiscordAvatarProps> = ({
 
   return (
     <Image
-      onError={void setError}
+      onError={setError}
       src={
         !user.avatar || error
           ? fallbackUrl

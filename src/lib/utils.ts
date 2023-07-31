@@ -1,7 +1,8 @@
 import { type APIUser } from "discord-api-types/v10";
 
-// TODO: Implement function to check old tokens, remove 27 group
-export const TOKEN_REGEX = /[A-Za-z\d]{24,28}\.[\w-]{6}\.[\w-]{27,38}/g;
+export const TOKEN_REGEX = /[A-Za-z\d]{24,28}\.[\w-]{6}\.[\w-]{38}/g;
+
+export const TOKEN_REGEX_LEGACY = /[A-Za-z\d]{24,28}\.[\w-]{6}\.[\w-]{27,38}/g;
 
 const LOCALES_MAP = [
   ["ar", "ARG"],

@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import { type PropsWithChildren } from "react";
 
-type BoxComponentProps = {
+interface BoxComponentProps {
   className?: string;
-};
+}
 
 const BoxComponent: React.FC<PropsWithChildren<BoxComponentProps>> = ({
   children,
@@ -13,7 +13,7 @@ const BoxComponent: React.FC<PropsWithChildren<BoxComponentProps>> = ({
     <div
       className={clsx(
         "rounded border border-gray-700 bg-gray-800 p-4",
-        className
+        className,
       )}
     >
       {children}

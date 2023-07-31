@@ -20,13 +20,13 @@ import { z } from "zod";
 import AlertMessage from "~/components/AlertMessage";
 import { useRouter } from "next/router";
 
-type PageProps = {
+interface PageProps {
   csrfToken: string | undefined;
   providers: Record<
     LiteralUnion<BuiltInProviderType>,
     ClientSafeProvider
   > | null;
-};
+}
 
 const ProviderList: React.FC<{ providers: PageProps["providers"] }> = ({
   providers,
@@ -54,7 +54,7 @@ const ProviderList: React.FC<{ providers: PageProps["providers"] }> = ({
             key={key}
             className={clsx(
               "inline-flex h-8 w-8 items-center justify-center rounded-full transition duration-150 disabled:opacity-50",
-              provider.style
+              provider.style,
             )}
             onClick={() => void signIn(key)}
             disabled={!providers || !(key in providers)}
@@ -97,7 +97,7 @@ const AdminLogin: NextPage<PageProps> = ({ csrfToken, providers }) => {
               validationSchema={toFormikValidationSchema(
                 z.object({
                   email: z.string().email(),
-                })
+                }),
               )}
               onSubmit={({ email }) => signIn("email", { email, csrfToken })}
             >
@@ -112,7 +112,8 @@ const AdminLogin: NextPage<PageProps> = ({ csrfToken, providers }) => {
                     type="email"
                     className={clsx(
                       "mb-1 mt-1 block w-full rounded border-2 border-blurple bg-gray-700 p-2 font-mono placeholder-gray-300 caret-blurple outline-none focus:border-blurple-dark",
-                      "email" in errors && "border-red-500 focus:border-red-500"
+                      "email" in errors &&
+                        "border-red-500 focus:border-red-500",
                     )}
                     placeholder="admin@janic.dev"
                   />

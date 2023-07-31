@@ -1,6 +1,7 @@
 import Container from "~/components/Container";
 import Link from "next/link";
 import { SiDiscord, SiGithub } from "react-icons/si";
+import { BsPersonFillLock } from "react-icons/bs";
 
 const Header: React.FC = () => {
   return (
@@ -13,13 +14,21 @@ const Header: React.FC = () => {
           </Link>
           <span className="-mt-1 text-xs text-neutral-200">by masterjanic</span>
         </div>
-        <Link
-          target="_blank"
-          href="https://github.com/masterjanic/discord-checker-web"
-          className="ml-auto mt-1 transition duration-150 hover:text-neutral-300"
-        >
-          <SiGithub size={24} />
-        </Link>
+        <div className="ml-auto flex items-center space-x-2">
+          <Link
+            href="/been-pwned"
+            className="ml-auto mt-1 transition duration-150 hover:text-neutral-300"
+          >
+            <BsPersonFillLock size={24} />
+          </Link>
+          <Link
+            target="_blank"
+            href="https://github.com/masterjanic/discord-checker-web"
+            className="ml-auto mt-1 transition duration-150 hover:text-neutral-300"
+          >
+            <SiGithub size={24} />
+          </Link>
+        </div>
       </Container>
     </header>
   );

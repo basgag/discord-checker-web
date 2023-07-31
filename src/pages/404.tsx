@@ -7,7 +7,7 @@ import Link from "next/link";
 const Custom404: React.FC = () => {
   return (
     <>
-      <NextSeo title="Oops! Page Not Found" />
+      <NextSeo title="Oops! Page Not Found" noindex={true} />
       <Header />
       <main className="flex h-[calc(100vh-300px)] items-center justify-center text-center">
         <BackgroundGrid />

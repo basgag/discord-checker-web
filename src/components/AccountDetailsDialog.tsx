@@ -3,6 +3,7 @@ import { Dialog } from "@headlessui/react";
 import {
   FiAlertTriangle,
   FiCheckCircle,
+  FiLogIn,
   FiUser,
   FiXCircle,
 } from "react-icons/fi";
@@ -14,9 +15,9 @@ import DiscordAvatar from "~/components/DiscordAvatar";
 import BadgeList from "~/components/BadgeList";
 import { isMigratedUser, usernameOrTag } from "~/lib/utils";
 
-type ExportDialogProps = {
+interface ExportDialogProps {
   account: Account;
-};
+}
 
 const AccountDetailsDialog: React.FC<PropsWithChildren<ExportDialogProps>> = ({
   account,
@@ -123,7 +124,7 @@ const AccountDetailsDialog: React.FC<PropsWithChildren<ExportDialogProps>> = ({
                       </th>
                       <td className="px-2 py-1">
                         {new Date(
-                          snowflakeToMilliseconds(account.user.id)
+                          snowflakeToMilliseconds(account.user.id),
                         ).toLocaleString()}
                       </td>
                     </tr>
@@ -136,11 +137,28 @@ const AccountDetailsDialog: React.FC<PropsWithChildren<ExportDialogProps>> = ({
               <h2 className="mb-1 font-medium">
                 Tokens ({account.tokens.length})
               </h2>
+
               <div className="overflow-hidden text-ellipsis rounded border border-gray-700 bg-gray-800 p-1 text-sm">
                 {account.tokens.map((token, index) => (
-                  <span key={`${account.user.id}-token-${index}`}>{token}</span>
+                  <div key={`${account.user.id}-token-${index}`}>
+                    <input name="token" type="hidden" value={token} />
+                    <span className="mb-1">{token}</span>
+                  </div>
                 ))}
               </div>
+
+              <hr className="my-6 border-gray-700" />
+
+              <p className="mt-2 text-sm text-gray-200">
+                Use the Chrome extension to directly login.
+              </p>
+              <button
+                name="fast-login"
+                className="mt-2 inline-flex items-center rounded bg-blurple px-2 py-1 transition duration-150 hover:bg-blurple-dark"
+              >
+                <FiLogIn className="mr-2" />
+                Fast Login
+              </button>
             </div>
           </Dialog.Panel>
         </div>

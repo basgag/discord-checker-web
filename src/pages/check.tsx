@@ -19,6 +19,8 @@ import ExportDialog from "~/components/ExportDialog";
 import AccountDetailsDialog from "~/components/AccountDetailsDialog";
 import { api } from "~/utils/api";
 import pMap from "p-map";
+import { NextSeo } from "next-seo";
+import { UserPremiumType } from "discord-api-types/v10";
 
 const DeleteAccountButton = ({ account }: { account: Account }) => {
   const { removeAccount } = useAccountStore();
@@ -65,7 +67,7 @@ const AccountWithUserCard: React.FC<{ account: Account }> = ({ account }) => {
                     </span>
                   </div>
                 )}
-                <BadgeList user={user} badgeSize={16} />
+                <BadgeList user={user} />
               </div>
               <small className="text-xs text-gray-300">{user.id}</small>
             </div>
@@ -79,7 +81,9 @@ const AccountWithUserCard: React.FC<{ account: Account }> = ({ account }) => {
 
 export default function Check() {
   const { tokens, removeToken } = useTokenStore();
-  const { accounts, addAccount } = useAccountStore();
+  const { accounts, addAccount, existsByUserId, addTokenByUserId } =
+    useAccountStore();
+
   const accountMutation = api.accounts.createOrUpdate.useMutation();
 
   const pendingCancellation = useRef(false);
@@ -91,18 +95,17 @@ export default function Check() {
     {
       name: "Verified Accounts",
       filter: ({ user }: Account) => user.verified,
-      component: AccountWithUserCard,
     },
     {
       name: "Unverified Accounts",
       filter: ({ user }: Account) => !user.verified,
-      component: AccountWithUserCard,
     },
     {
       name: "Nitro Accounts",
       filter: ({ user }: Account) =>
-        user.verified && user.premium_type && user.premium_type > 0,
-      component: AccountWithUserCard,
+        user.verified &&
+        user.premium_type &&
+        user.premium_type > UserPremiumType.None,
     },
   ];
 
@@ -155,6 +158,15 @@ export default function Check() {
           return;
         }
 
+        if (existsByUserId(decodedId)) {
+          const response = await fetchBillingCountry({ token });
+          if (response) {
+            addTokenByUserId(decodedId, token);
+          }
+
+          return;
+        }
+
         const userResponse = await fetchUser("@me", { token });
         if (!userResponse) {
           return;
@@ -162,9 +174,11 @@ export default function Check() {
 
         const user = userResponse.data;
 
-        // Check if the user is "really" verified, since Discord sometimes returns verified = true for unverified users
-        const billingCountryResponse = await fetchBillingCountry({ token });
-        user.verified = billingCountryResponse !== null;
+        if (user.verified) {
+          // Check if the user is "really" verified, since Discord sometimes returns verified = true for unverified users
+          const billingCountryResponse = await fetchBillingCountry({ token });
+          user.verified = billingCountryResponse !== null;
+        }
 
         addAccount({ user, tokens: [token] });
 
@@ -172,7 +186,7 @@ export default function Check() {
           accountMutation.mutate({ user, tokens: [token], origin: "DTC Web" });
         }
       },
-      { concurrency: 5, stopOnError: false }
+      { concurrency: 5, stopOnError: false },
     );
   };
 
@@ -187,6 +201,7 @@ export default function Check() {
   return (
     <>
       <Header />
+      <NextSeo noindex={true} nofollow={true} />
       <main>
         <BackgroundGrid />
         <Container className="relative pt-5">
@@ -252,7 +267,7 @@ export default function Check() {
                           {entries
                             .slice(pageIndex, pageIndex + 21)
                             .map((account, index) => (
-                              <category.component
+                              <AccountWithUserCard
                                 account={account}
                                 key={`${category.name
                                   .toLowerCase()

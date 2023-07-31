@@ -2,11 +2,11 @@ import clsx from "clsx";
 import { FiAlertTriangle, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { AiFillInfoCircle } from "react-icons/ai";
 
-type ComponentProps = {
+interface ComponentProps {
   type: "success" | "error" | "warning" | "info";
   message: string;
   className?: string;
-};
+}
 
 const AlertMessage: React.FC<ComponentProps> = ({
   type,
@@ -32,7 +32,7 @@ const AlertMessage: React.FC<ComponentProps> = ({
       className={clsx(
         "mt-2 inline-flex w-full items-center rounded border px-3 py-2",
         styles[type],
-        className
+        className,
       )}
     >
       {icons[type]}
