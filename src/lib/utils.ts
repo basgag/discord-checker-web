@@ -64,11 +64,11 @@ export const BADGE_FLAGS = Object.freeze({
   ACTIVE_DEVELOPER: 1 << 22,
   SUPPORTS_COMMANDS: 1 << 23,
   USES_AUTOMOD: 1 << 24,
-}) as { [index: string]: number };
+}) as Record<string, number>;
 
 export const hasFlag = (
   user: { flags?: APIUser["flags"] | bigint | null },
-  bit: string
+  bit: string,
 ): boolean => {
   if (!user.flags) {
     return false;

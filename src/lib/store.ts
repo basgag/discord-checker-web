@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { type APIUser } from "discord-api-types/v10";
-import { set } from "zod";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 interface TokenState {

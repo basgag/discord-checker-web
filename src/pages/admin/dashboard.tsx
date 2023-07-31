@@ -6,17 +6,15 @@ import { FiAlertTriangle, FiCheckCircle, FiStar } from "react-icons/fi";
 
 const ResponsiveChoroplethCanvas = dynamic(
   () => import("@nivo/geo").then((m) => m.ResponsiveChoroplethCanvas),
-  { ssr: false }
+  { ssr: false },
 );
 const ResponsiveLine = dynamic(
   () => import("@nivo/line").then((m) => m.ResponsiveLine),
-  { ssr: false }
+  { ssr: false },
 );
 
 import CountryFeatures from "~/lib/world_countries.json";
 import dynamic from "next/dynamic";
-import { localeToCountry } from "~/lib/utils";
-import Sidebar from "~/components/Sidebar";
 import AdminLayout from "~/layouts/AdminLayout";
 
 const SkeletonStatsCard: React.FC = () => {
@@ -112,7 +110,7 @@ export default function Dashboard() {
                   0,
                   Math.floor(
                     countries.reduce((a, b) => a + b.value, 0) /
-                      countries.length
+                      countries.length,
                   ),
                 ]}
                 unknownColor="#142669"

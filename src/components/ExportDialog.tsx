@@ -1,5 +1,5 @@
 import { type ChangeEvent, useMemo, useState } from "react";
-import { Dialog, Switch } from "@headlessui/react";
+import { Dialog } from "@headlessui/react";
 import { FiDownload, FiExternalLink } from "react-icons/fi";
 import { type Account } from "~/lib/store";
 import clsx from "clsx";

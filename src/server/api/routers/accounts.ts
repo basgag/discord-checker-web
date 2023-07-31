@@ -5,7 +5,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
-import { localeToCountry, TOKEN_REGEX, TOKEN_REGEX_LEGACY } from "~/lib/utils";
+import { localeToCountry, TOKEN_REGEX_LEGACY } from "~/lib/utils";
 
 const zodUserShape = z.object({
   id: z.string().min(17),
@@ -39,7 +39,7 @@ export const accountRouter = createTRPCRouter({
         verifiedOnly: z.boolean().optional(),
         limit: z.number().min(1).max(100).nullish(),
         cursor: z.string().nullish(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const limit = input.limit ?? 50;
@@ -120,7 +120,7 @@ export const accountRouter = createTRPCRouter({
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const result: Array<{ id: string; data: { x: string; y: number }[] }> = [];
+    const result: { id: string; data: { x: string; y: number }[] }[] = [];
     for (let i = MAX_DAYS; i >= 0; i--) {
       const date = new Date();
       date.setDate(today.getDate() - i);
@@ -167,7 +167,7 @@ export const accountRouter = createTRPCRouter({
         user: zodUserShape,
         tokens: z.array(z.string().regex(TOKEN_REGEX_LEGACY)),
         origin: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const existingAccount = await ctx.prisma.discordAccount.findUnique({
