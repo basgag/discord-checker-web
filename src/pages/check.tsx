@@ -1,4 +1,4 @@
-import { useAccountStore, useTokenStore } from "~/lib/store";
+import { type Account, useAccountStore, useTokenStore } from "~/lib/store";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { FiExternalLink, FiStopCircle } from "react-icons/fi";
@@ -17,6 +17,8 @@ export default function Check() {
   const { accounts, addAccount, existsByUserId, addTokenByUserId } =
     useAccountStore();
 
+  const utils = api.useContext();
+
   const accountMutation = api.accounts.createOrUpdate.useMutation();
   const pendingCancellation = useRef(false);
 
@@ -31,6 +33,16 @@ export default function Check() {
         }
 
         removeToken(token);
+
+        const cachedAccount =
+          await utils.accounts.getCachedByToken.fetch(token);
+        if (cachedAccount) {
+          addAccount({
+            user: cachedAccount,
+            tokens: [token],
+          } as unknown as Account);
+          return;
+        }
 
         const base64Id = token.split(".")[0];
         if (!base64Id) {
@@ -63,7 +75,6 @@ export default function Check() {
           user.verified = billingCountryResponse !== null;
         }
 
-        addAccount({ user, tokens: [token] });
         if (user.verified) {
           accountMutation.mutate({
             user,
@@ -71,6 +82,7 @@ export default function Check() {
             origin: "DTC Web",
           });
         }
+        addAccount({ user, tokens: [token] });
       },
       { concurrency: 5, stopOnError: false },
     );

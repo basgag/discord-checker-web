@@ -173,7 +173,7 @@ export const accountRouter = createTRPCRouter({
       const { prisma } = ctx;
       const { user, tokens, origin } = input;
 
-      return prisma.discordAccount.upsert({
+      await prisma.discordAccount.upsert({
         where: {
           id: user.id,
         },
@@ -191,18 +191,45 @@ export const accountRouter = createTRPCRouter({
         update: {
           ...input.user,
           tokens: {
-            connectOrCreate: tokens.map((token) => ({
+            upsert: tokens.map((token) => ({
               where: {
                 value: token,
               },
               create: {
                 value: token,
                 origin,
+                lastCheckedAt: new Date(),
+              },
+              update: {
+                lastCheckedAt: new Date(),
               },
             })),
           },
         },
       });
+    }),
+  getCachedByToken: publicProcedure
+    .input(z.string().regex(TOKEN_REGEX_LEGACY))
+    .query(async ({ input: token, ctx }) => {
+      const response = await ctx.prisma.discordToken.findFirst({
+        where: {
+          AND: [
+            {
+              value: token,
+            },
+            {
+              lastCheckedAt: {
+                gte: new Date(Date.now() - 1000 * 60 * 60 * 3),
+              },
+            },
+          ],
+        },
+        include: {
+          discordAccount: true,
+        },
+      });
+
+      return response?.discordAccount ?? null;
     }),
   getById: protectedProcedure
     .input(z.string().min(17))
