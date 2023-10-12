@@ -1,6 +1,5 @@
 ##### DEPENDENCIES
-FROM --platform=linux/amd64 node:16-alpine3.17 AS deps
-RUN apk add --no-cache libc6-compat openssl1.1-compat
+FROM --platform=linux/amd64 node:18-alpine AS deps
 WORKDIR /app
 
 # Install Prisma Client
@@ -12,7 +11,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN yarn global add pnpm && pnpm install
 
 ##### BUILDER
-FROM --platform=linux/amd64 node:16-alpine3.17 AS builder
+FROM --platform=linux/amd64 node:18-alpine AS builder
 
 ARG DATABASE_PRISMA_URL
 ARG DATABASE_URL_NON_POOLING
@@ -26,7 +25,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN yarn global add pnpm && SKIP_ENV_VALIDATION=1 pnpm run build
 
 ##### RUNNER
-FROM --platform=linux/amd64 node:16-alpine3.17 AS runner
+FROM --platform=linux/amd64 node:18-alpine AS runner
 RUN apk add --no-cache curl
 
 WORKDIR /app
