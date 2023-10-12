@@ -5,7 +5,7 @@ import { api } from "~/utils/api";
 import { useState } from "react";
 import DiscordAvatar from "~/components/DiscordAvatar";
 import { isMigratedUser, usernameOrTag } from "~/lib/utils";
-import BadgeList from "~/components/BadgeList";
+import BadgeList from "~/components/common/discord/BadgeList";
 import clsx from "clsx";
 import {
   FiArrowLeft,
@@ -52,7 +52,7 @@ export default function AccountsOverview() {
         nitroOnly: isNitroOnly,
         verifiedOnly: isVerifiedOnly,
       },
-      { getNextPageParam: (lastPage) => lastPage.nextCursor }
+      { getNextPageParam: (lastPage) => lastPage.nextCursor },
     );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,7 +108,7 @@ export default function AccountsOverview() {
             "mr-1 rounded border border-gray-700 bg-gray-800 p-2.5 transition duration-150 ease-in-out hover:border-purple-500 hover:bg-purple-400/30 md:mr-0",
             isNitroOnly
               ? "border-purple-500 bg-gradient-to-br from-purple-400/30 to-purple-500/20"
-              : "border-gray-700"
+              : "border-gray-700",
           )}
         >
           <Image
@@ -124,7 +124,7 @@ export default function AccountsOverview() {
             "rounded border border-gray-700 bg-gray-800 p-2.5 transition duration-150 ease-in-out hover:border-green-500 hover:bg-green-400/30",
             isVerifiedOnly
               ? "border-green-500 bg-gradient-to-br from-green-400/30 to-green-500/20"
-              : "border-gray-700"
+              : "border-gray-700",
           )}
         >
           <FiCheckCircle className="h-6 w-8 text-green-500" />
@@ -156,7 +156,7 @@ export default function AccountsOverview() {
                     className={({ active }) =>
                       clsx(
                         "relative select-none py-2 pl-10 pr-4",
-                        active && "bg-blurple-dark/50 text-indigo-100"
+                        active && "bg-blurple-dark/50 text-indigo-100",
                       )
                     }
                   >
@@ -204,7 +204,7 @@ export default function AccountsOverview() {
                     "border-yellow-500 bg-gradient-to-br from-yellow-400/30 to-yellow-500/20 text-yellow-200",
                   account.premium_type &&
                     account.premium_type > 0 &&
-                    "border-purple-500 bg-gradient-to-br from-purple-400/30 to-purple-500/20 text-purple-200"
+                    "border-purple-500 bg-gradient-to-br from-purple-400/30 to-purple-500/20 text-purple-200",
                 )}
                 key={`a-${account.id}`}
               >
@@ -228,7 +228,7 @@ export default function AccountsOverview() {
                                 !account.verified && "text-yellow-300",
                                 account.premium_type &&
                                   account.premium_type > 0 &&
-                                  "text-purple-300"
+                                  "text-purple-300",
                               )}
                             >
                               #{account.discriminator}

@@ -1,8 +1,9 @@
 import { NextSeo } from "next-seo";
-import Container from "~/components/Container";
 import BackgroundGrid from "~/components/BackgroundGrid";
-import Header from "~/components/Header";
 import Link from "next/link";
+import React from "react";
+import Container from "~/components/common/Container";
+import Header from "~/components/common/Header";
 
 const Custom404: React.FC = () => {
   return (
@@ -19,7 +20,7 @@ const Custom404: React.FC = () => {
           </p>
           <Link
             href="/"
-            className="mt-4 inline-block rounded-full bg-blurple px-6 py-2 text-neutral-200 transition duration-150 hover:bg-blurple-dark hover:text-neutral-100"
+            className="mt-4 inline-block rounded-lg bg-blurple px-6 py-2 font-medium text-neutral-200 transition duration-150 hover:bg-blurple-dark hover:text-neutral-100"
           >
             Go to Home
           </Link>

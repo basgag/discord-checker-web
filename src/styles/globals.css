@@ -3,45 +3,51 @@
 @tailwind utilities;
 
 @layer base {
-    html {
-        @apply scroll-smooth bg-gray-900 leading-relaxed text-neutral-100 antialiased;
-    }
+  html {
+    @apply scroll-smooth bg-blueish-grey-900 leading-relaxed text-neutral-100 antialiased scrollbar-thin scrollbar-track-blueish-grey-600 scrollbar-thumb-blueish-grey-500/60;
+  }
 
-    html, body {
-        @apply max-w-[100vw] overflow-x-hidden slim-scrollbar;
-    }
+  html,
+  body {
+    @apply max-w-[100vw];
+  }
 
-    ::selection {
-        @apply bg-blurple text-white;
-    }
+  ::selection {
+    @apply bg-blueish-grey-500/60 text-neutral-100;
+  }
 }
 
 @layer utilities {
-    .background-grid {
-        background-size: 30px 30px;
-        background-image: linear-gradient(to right, grey 1px, transparent 1px),
-        linear-gradient(to bottom, grey 1px, transparent 1px);
-        mask-image: linear-gradient(to bottom, transparent, black, transparent);
-    }
+  .background-grid {
+    background-size: 60px 60px;
+    background-image: linear-gradient(
+        to right,
+        rgb(84, 118, 242, 0.8) 2px,
+        transparent 2px
+      ),
+      linear-gradient(to bottom, rgb(84, 118, 242, 0.8) 2px, transparent 2px);
+    mask-image: linear-gradient(to bottom, transparent, black, transparent);
+  }
 
-    .slim-scrollbar {
-        scrollbar-width: thin;
-        scrollbar-color: theme("colors.gray.600") theme("colors.gray.900");
-    }
+  .background-grid-isometric {
+    background-size: 162px 92px;
+    background-image: repeating-linear-gradient(
+        150deg,
+        rgb(84, 118, 242, 0.8),
+        rgb(84, 118, 242, 0.8) 1px,
+        transparent 2px,
+        transparent 80px
+      ),
+      repeating-linear-gradient(
+        30deg,
+        rgb(84, 118, 242, 0.8),
+        rgb(84, 118, 242, 0.8) 1px,
+        transparent 2px,
+        transparent 80px
+      );
+  }
 
-    .slim-scrollbar::-webkit-scrollbar {
-        @apply w-[14px];
-    }
-
-    .slim-scrollbar::-webkit-scrollbar-thumb {
-        @apply rounded border-2 border-solid border-gray-900 bg-gray-600;
-    }
-
-    .slim-scrollbar::-webkit-scrollbar-thumb:hover {
-        @apply bg-gray-500/60;
-    }
-
-    .slim-scrollbar::-webkit-scrollbar-track {
-        @apply bg-gray-900;
-    }
+  .glow {
+    box-shadow: 0 0 40px rgb(84, 118, 242, 0.4);
+  }
 }

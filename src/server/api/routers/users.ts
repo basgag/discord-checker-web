@@ -3,6 +3,9 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 
 export const userRouter = createTRPCRouter({
+  getAll: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.user.findMany();
+  }),
   getById: protectedProcedure
     .input(z.string().cuid())
     .query(async ({ ctx, input: id }) => {
@@ -16,7 +19,7 @@ export const userRouter = createTRPCRouter({
       }
       return user;
     }),
-  deleteById: protectedProcedure
+  delete: protectedProcedure
     .input(z.string().cuid())
     .query(async ({ ctx, input: id }) => {
       const userCount = await ctx.prisma.user.count();
@@ -51,7 +54,4 @@ export const userRouter = createTRPCRouter({
         },
       });
     }),
-  getAll: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.user.findMany();
-  }),
 });

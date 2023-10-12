@@ -1,51 +1,41 @@
-import { type GetServerSidePropsContext, type NextPage } from "next";
-import { getServerAuthSession } from "~/server/auth";
 import {
-  type ClientSafeProvider,
-  getCsrfToken,
-  getProviders,
-  type LiteralUnion,
-  signIn,
-} from "next-auth/react";
-import { type BuiltInProviderType } from "next-auth/providers";
+  type GetServerSidePropsContext,
+  type InferGetServerSidePropsType,
+  type NextPage,
+} from "next";
+import { getServerAuthSession } from "~/server/auth";
+import { getCsrfToken, getProviders, signIn } from "next-auth/react";
 import { SiDiscord, SiGithub, SiGoogle } from "react-icons/si";
 import clsx from "clsx";
-import Header from "~/components/Header";
-import Container from "~/components/Container";
-import BackgroundGrid from "~/components/BackgroundGrid";
-import BoxComponent from "~/components/BoxComponent";
+import BoxComponent from "~/components/common/BoxComponent";
 import { toFormikValidationSchema } from "zod-formik-adapter";
-import { ErrorMessage, Field, Form, Formik } from "formik";
+import { Field, Form, Formik } from "formik";
 import { z } from "zod";
-import AlertMessage from "~/components/AlertMessage";
+import AlertMessage from "~/components/common/AlertMessage";
 import { useRouter } from "next/router";
+import DefaultLayout from "~/layouts/DefaultLayout";
+import { FiLogIn } from "react-icons/fi";
+import Button from "~/components/common/Button";
+import InputField from "~/components/common/InputField";
 
-interface PageProps {
-  csrfToken: string | undefined;
-  providers: Record<
-    LiteralUnion<BuiltInProviderType>,
-    ClientSafeProvider
-  > | null;
-}
+const providerStyles = {
+  discord: {
+    icon: <SiDiscord />,
+    style: "bg-blurple hover:bg-blurple-dark",
+  },
+  google: {
+    icon: <SiGoogle />,
+    style: "bg-[#F65314] hover:bg-[#EA4335]",
+  },
+  github: {
+    icon: <SiGithub />,
+    style: "bg-white hover:bg-gray-200 text-black",
+  },
+};
 
-const ProviderList: React.FC<{ providers: PageProps["providers"] }> = ({
-  providers,
-}) => {
-  const providerStyles = {
-    discord: {
-      icon: <SiDiscord />,
-      style: "bg-blurple hover:bg-blurple-dark",
-    },
-    google: {
-      icon: <SiGoogle />,
-      style: "bg-[#F65314] hover:bg-[#EA4335]",
-    },
-    github: {
-      icon: <SiGithub />,
-      style: "bg-white hover:bg-gray-200 text-black",
-    },
-  };
+type TProviderListProps = Pick<TAdminLoginProps, "providers">;
 
+const ProviderList: React.FC<TProviderListProps> = ({ providers }) => {
   return (
     <div className="flex items-center justify-center space-x-2">
       {Object.entries(providerStyles).map(([key, provider]) => {
@@ -53,12 +43,13 @@ const ProviderList: React.FC<{ providers: PageProps["providers"] }> = ({
           <button
             key={key}
             className={clsx(
-              "inline-flex h-8 w-8 items-center justify-center rounded-full transition duration-150 disabled:opacity-50",
+              "inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 disabled:opacity-50",
               provider.style,
             )}
             onClick={() => void signIn(key)}
             disabled={!providers || !(key in providers)}
           >
+            <span className="sr-only">Sign in with {key.toUpperCase()}</span>
             {provider.icon}
           </button>
         );
@@ -67,92 +58,69 @@ const ProviderList: React.FC<{ providers: PageProps["providers"] }> = ({
   );
 };
 
-const AdminLogin: NextPage<PageProps> = ({ csrfToken, providers }) => {
+type TAdminLoginProps = InferGetServerSidePropsType<typeof getServerSideProps>;
+
+const AdminLogin: NextPage<TAdminLoginProps> = ({ csrfToken, providers }) => {
   const router = useRouter();
   const { error } = router.query;
 
   return (
-    <>
-      <Header />
-      <main className="flex h-[calc(100vh-300px)] items-center justify-center text-center">
-        <BackgroundGrid />
-        <Container className="relative pt-5">
-          <h1
-            className={clsx("text-center text-2xl font-bold", !error && "mb-5")}
-          >
-            Admin Login
-          </h1>
+    <DefaultLayout
+      seo={{ nofollow: true, noindex: true }}
+      className="flex h-[calc(100vh-200px)] items-center justify-center"
+    >
+      {error && (
+        <AlertMessage
+          className="mb-2"
+          type="error"
+          message="Something went wrong. Please try again."
+        />
+      )}
 
-          {error && (
-            <AlertMessage
-              className="mb-2"
-              type="error"
-              message="Something went wrong. Please try again."
-            />
+      <BoxComponent className="mx-auto mt-12 max-w-md bg-opacity-70 lg:mt-16">
+        <h2 className="text-xl font-semibold">Sign In</h2>
+        <p className="mt-[0.15rem] text-neutral-200">to manage this project</p>
+
+        <Formik
+          initialValues={{ email: "" }}
+          validationSchema={toFormikValidationSchema(
+            z.object({
+              email: z.string().email(),
+            }),
           )}
+          onSubmit={({ email }) => signIn("email", { email })}
+        >
+          {({ isValid }) => (
+            <Form className="mt-6">
+              <input type="hidden" name="csrfToken" value={csrfToken} />
+              <Field
+                component={InputField}
+                name="email"
+                type="email"
+                placeholder="E-Mail"
+              />
 
-          <BoxComponent className="mx-auto max-w-sm text-left">
-            <Formik
-              initialValues={{ email: "" }}
-              validationSchema={toFormikValidationSchema(
-                z.object({
-                  email: z.string().email(),
-                }),
-              )}
-              onSubmit={({ email }) => signIn("email", { email, csrfToken })}
-            >
-              {({ errors, isValid }) => (
-                <Form>
-                  <label htmlFor="email" className="font-medium">
-                    E-Mail
-                  </label>
-                  <Field
-                    id="email"
-                    name="email"
-                    type="email"
-                    className={clsx(
-                      "mb-1 mt-1 block w-full rounded border-2 border-blurple bg-gray-700 p-2 font-mono placeholder-gray-300 caret-blurple outline-none focus:border-blurple-dark",
-                      "email" in errors &&
-                        "border-red-500 focus:border-red-500",
-                    )}
-                    placeholder="admin@janic.dev"
-                  />
-                  <ErrorMessage
-                    className="mb-2 text-right text-xs text-red-500"
-                    component="p"
-                    name="email"
-                  />
+              <Button disabled={!isValid} className="mt-3 w-full text-base">
+                <FiLogIn className="h-5 w-5" />
+                <span className="font-normal">Sign in with E-Mail</span>
+              </Button>
+            </Form>
+          )}
+        </Formik>
 
-                  <button
-                    className="w-full rounded bg-blurple px-2 py-1.5 text-center font-medium transition duration-150 hover:bg-blurple-dark disabled:opacity-50"
-                    disabled={!isValid}
-                    type="submit"
-                  >
-                    Sign In
-                  </button>
-                </Form>
-              )}
-            </Formik>
+        <hr className="my-8 border-blueish-grey-600" />
 
-            <div className="my-4 text-center">
-              <span className="font-semibold text-gray-200">
-                &#9135;&nbsp; OR &#9135;
-              </span>
-            </div>
+        <ProviderList providers={providers} />
 
-            <ProviderList providers={providers} />
+        <p className="mt-8 text-center text-xs font-light text-neutral-300">
+          This area is only accessible for the maintainer of this project.
+        </p>
+      </BoxComponent>
 
-            <p className="mt-4 text-center text-xs text-neutral-300">
-              This area is only accessible for the owner of this project.
-            </p>
-          </BoxComponent>
-
-          <footer className="mt-4 text-center text-xs text-gray-300">
-            <p>Coded with ❤️ by masterjanic</p>
-          </footer>
-        </Container>
-      </main>
-    </>
+      <footer className="mt-8 text-center text-xs text-neutral-300">
+        <p>Coded with ❤️ by masterjanic</p>
+      </footer>
+    </DefaultLayout>
   );
 };
 

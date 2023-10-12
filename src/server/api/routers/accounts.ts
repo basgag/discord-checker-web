@@ -170,91 +170,39 @@ export const accountRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const existingAccount = await ctx.prisma.discordAccount.findUnique({
+      const { prisma } = ctx;
+      const { user, tokens, origin } = input;
+
+      return prisma.discordAccount.upsert({
         where: {
-          id: input.user.id,
+          id: user.id,
         },
-        include: {
-          tokens: true,
-        },
-      });
-      if (existingAccount) {
-        const tokens = input.tokens.filter((token) => {
-          return !existingAccount.tokens.some((t) => t.value === token);
-        });
-
-        if (tokens.length > 0) {
-          await ctx.prisma.discordAccount.update({
-            where: {
-              id: input.user.id,
-            },
-            data: {
-              ...input.user,
-              tokens: {
-                createMany: {
-                  data: tokens.map((token) => ({
-                    value: token,
-                    origin: input.origin,
-                  })),
-                },
-              },
-            },
-          });
-        }
-
-        await ctx.prisma.discordAccount.update({
-          where: {
-            id: input.user.id,
-          },
-          data: {
-            ...input.user,
-          },
-        });
-
-        return;
-      }
-
-      await ctx.prisma.discordAccount.create({
-        data: {
+        create: {
           ...input.user,
           tokens: {
             createMany: {
-              data: input.tokens.map((token) => ({
+              data: tokens.map((token) => ({
                 value: token,
-                origin: input.origin,
+                origin,
               })),
             },
           },
         },
-      });
-    }),
-  getPreviewById: publicProcedure
-    .input(z.string().min(17))
-    .query(async ({ input: id, ctx }) => {
-      const account = await ctx.prisma.discordAccount.findUnique({
-        where: {
-          id,
-        },
-        select: {
-          id: true,
-          username: true,
-          discriminator: true,
-          avatar: true,
-          flags: true,
-          premium_type: true,
-          createdAt: true,
-          _count: {
-            select: {
-              tokens: true,
-            },
+        update: {
+          ...input.user,
+          tokens: {
+            connectOrCreate: tokens.map((token) => ({
+              where: {
+                value: token,
+              },
+              create: {
+                value: token,
+                origin,
+              },
+            })),
           },
         },
       });
-      if (!account) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
-      return account;
     }),
   getById: protectedProcedure
     .input(z.string().min(17))
@@ -265,24 +213,6 @@ export const accountRouter = createTRPCRouter({
         },
         include: {
           tokens: true,
-        },
-      });
-      if (!account) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
-      return account;
-    }),
-  getByToken: protectedProcedure
-    .input(z.string())
-    .query(async ({ input: token, ctx }) => {
-      const account = await ctx.prisma.discordAccount.findFirst({
-        where: {
-          tokens: {
-            some: {
-              value: token,
-            },
-          },
         },
       });
       if (!account) {

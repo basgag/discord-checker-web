@@ -13,6 +13,35 @@ export const snowflakeToMilliseconds = (snowflake: string): number => {
   return Number(snowflake) / 4194304 + DISCORD_EPOCH;
 };
 
+/**
+ * Checks if the given snowflake is valid.
+ * @param snowflake
+ */
+export const isValidSnowflake = (snowflake: string): boolean => {
+  if (!/^\d+$/.test(snowflake)) {
+    return false;
+  }
+
+  const creationMilliseconds = snowflakeToMilliseconds(snowflake);
+  return (
+    creationMilliseconds > DISCORD_EPOCH && creationMilliseconds < Date.now()
+  );
+};
+
+/**
+ * Checks if the given token has a valid snowflake id.
+ * @param token
+ */
+export const hasValidSnowflake = (token: string): boolean => {
+  const base64Id = token.split(".")[0];
+  if (!base64Id) {
+    return false;
+  }
+
+  const decodedId = atob(base64Id);
+  return isValidSnowflake(decodedId);
+};
+
 interface RequestConfig {
   data?: object;
   token?: string;

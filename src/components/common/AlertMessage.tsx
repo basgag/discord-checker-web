@@ -2,31 +2,31 @@ import clsx from "clsx";
 import { FiAlertTriangle, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { AiFillInfoCircle } from "react-icons/ai";
 
-interface ComponentProps {
+interface IAlertMessageProps extends React.HTMLAttributes<HTMLDivElement> {
   type: "success" | "error" | "warning" | "info";
   message: string;
-  className?: string;
 }
 
-const AlertMessage: React.FC<ComponentProps> = ({
+const styles = {
+  success: "bg-green-500 border-green-400",
+  error: "bg-red-500 border-red-400",
+  warning: "bg-yellow-500 border-yellow-400",
+  info: "bg-blue-500 border-blue-400",
+};
+
+const icons = {
+  success: <FiCheckCircle />,
+  error: <FiXCircle />,
+  warning: <FiAlertTriangle />,
+  info: <AiFillInfoCircle />,
+};
+
+const AlertMessage: React.FC<IAlertMessageProps> = ({
   type,
   message,
   className,
+  ...props
 }) => {
-  const styles = {
-    success: "bg-green-500 border-green-400",
-    error: "bg-red-500 border-red-400",
-    warning: "bg-yellow-500 border-yellow-400",
-    info: "bg-blue-500 border-blue-400",
-  };
-
-  const icons = {
-    success: <FiCheckCircle />,
-    error: <FiXCircle />,
-    warning: <FiAlertTriangle />,
-    info: <AiFillInfoCircle />,
-  };
-
   return (
     <div
       className={clsx(
@@ -34,6 +34,7 @@ const AlertMessage: React.FC<ComponentProps> = ({
         styles[type],
         className,
       )}
+      {...props}
     >
       {icons[type]}
       <span className="ml-2 text-sm font-medium">{message}</span>

@@ -5,46 +5,48 @@ generator client {
 
 datasource db {
   provider          = "postgresql"
-  url               = env("DATABASE_PRISMA_URL") // uses connection pooling
-  directUrl         = env("DATABASE_URL_NON_POOLING") // uses a direct connection
-  shadowDatabaseUrl = env("DATABASE_URL_NON_POOLING") // used for migrations
+  url               = env("DATABASE_PRISMA_URL")
+  directUrl         = env("DATABASE_URL_NON_POOLING")
+  shadowDatabaseUrl = env("DATABASE_URL_NON_POOLING")
 }
 
 model DiscordAccount {
-  id            String         @id @unique
-  username      String
-  discriminator String
-  avatar        String?
-  email         String?
-  verified      Boolean?
-  accent_color  Int?
-  banner        String?
-  bot           Boolean?
-  flags         BigInt?
-  global_name   String?
-  locale        String?
-  mfa_enabled   Boolean?
-  premium_type  Int?
-  public_flags  Int?
-  system        Boolean?
-  phone         String?
-  nsfw_allowed  Boolean?
-  bio           String?
-  banner_color  String?
-  tokens        DiscordToken[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id                String         @id @unique
+  username          String         @db.VarChar(32)
+  password          String?
+  discriminator     String         @db.VarChar(4)
+  global_name       String?        @db.VarChar(32)
+  avatar            String?
+  avatar_decoration String?
+  email             String?        @db.VarChar(254)
+  verified          Boolean?
+  accent_color      Int?
+  banner            String?
+  bot               Boolean?
+  flags             BigInt?
+  locale            String?
+  mfa_enabled       Boolean?
+  premium_type      Int?
+  public_flags      BigInt?
+  system            Boolean?
+  phone             String?
+  nsfw_allowed      Boolean?
+  bio               String?        @db.VarChar(190)
+  banner_color      String?
+  tokens            DiscordToken[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 }
 
 model DiscordToken {
-  id               String         @id @unique @default(cuid())
+  id               String         @id @default(cuid())
+  discordAccountId String
   value            String         @unique
   origin           String?
+  discordAccount   DiscordAccount @relation(fields: [discordAccountId], references: [id], onDelete: Cascade)
   lastCheckedAt    DateTime       @default(now())
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
-  DiscordAccount   DiscordAccount @relation(fields: [discordAccountId], references: [id], onDelete: Cascade)
-  discordAccountId String
 }
 
 // Necessary for Next auth
@@ -80,6 +82,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  permissions   Int       @default(0)
   accounts      Account[]
   sessions      Session[]
 }

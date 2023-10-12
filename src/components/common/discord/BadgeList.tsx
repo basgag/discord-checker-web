@@ -1,9 +1,10 @@
 import Image from "next/image";
 import { type APIUser, UserPremiumType } from "discord-api-types/v10";
 import { BADGE_FLAGS, hasFlag, toTitleCase } from "~/lib/utils";
-import Tooltip from "~/components/Tooltip";
+import Tooltip from "~/components/common/Tooltip";
+import clsx from "clsx";
 
-interface BadgeListProps {
+interface IBadgeListProps extends React.HTMLAttributes<HTMLDivElement> {
   user: {
     id: APIUser["id"];
     flags?: bigint | number | null;
@@ -11,9 +12,13 @@ interface BadgeListProps {
   };
 }
 
-const BadgeList: React.FC<BadgeListProps> = ({ user }) => {
+const BadgeList: React.FC<IBadgeListProps> = ({
+  user,
+  className,
+  ...props
+}) => {
   return (
-    <div className="flex items-center space-x-1">
+    <div className={clsx("flex items-center space-x-1", className)} {...props}>
       {user.flags
         ? Object.keys(BADGE_FLAGS)
             .filter((bit) => hasFlag(user, bit))
@@ -24,7 +29,8 @@ const BadgeList: React.FC<BadgeListProps> = ({ user }) => {
                   alt={toTitleCase(flag)}
                   width={12}
                   height={12}
-                  className={"h-3 w-3 bg-contain object-scale-down"}
+                  draggable={false}
+                  className="h-3 w-auto flex-shrink-0 select-none"
                 />
               </Tooltip>
             ))
@@ -43,7 +49,8 @@ const BadgeList: React.FC<BadgeListProps> = ({ user }) => {
             alt="Discord Nitro"
             width={12}
             height={12}
-            className="h-3 w-full"
+            className="h-3 w-auto flex-shrink-0 select-none"
+            draggable={false}
           />
         </Tooltip>
       ) : null}

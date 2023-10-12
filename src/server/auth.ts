@@ -21,15 +21,13 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: DefaultSession["user"] & {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      permissions: number;
     };
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    permissions: number;
+  }
 }
 
 /**
@@ -40,35 +38,32 @@ declare module "next-auth" {
 export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ account }) {
-      // Disallow credentials sign in
       if (!account) {
         return false;
       }
 
-      // Allow first login ever to pass, automatically creates a user
       const userCount = await prisma.user.count();
       if (userCount === 0) {
-        return true;
+        return (
+          account.provider === "discord" &&
+          account.providerAccountId === env.DISCORD_OWNER_ID
+        );
       }
 
-      // If the user is signing in with a provider other than email, check if they have an account
-      if (account.provider !== "email") {
-        const existingAccount = await prisma.user.findFirst({
-          where: {
-            accounts: {
-              some: {
-                providerAccountId: account.providerAccountId,
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          OR: [
+            {
+              email: account.providerAccountId,
+            },
+            {
+              accounts: {
+                some: {
+                  providerAccountId: account.providerAccountId,
+                },
               },
             },
-          },
-        });
-        return !!existingAccount;
-      }
-
-      // If the user is signing in with email, check if they have an account
-      const existingUser = await prisma.user.findUnique({
-        where: {
-          email: account.providerAccountId,
+          ],
         },
       });
       return !!existingUser;
@@ -78,6 +73,7 @@ export const authOptions: NextAuthOptions = {
       user: {
         ...session.user,
         id: user.id,
+        permissions: user.permissions,
       },
     }),
   },

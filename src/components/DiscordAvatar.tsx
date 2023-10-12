@@ -47,7 +47,8 @@ const DiscordAvatar: React.FC<DiscordAvatarProps> = ({
       alt={`Avatar of ${user.username}`}
       width={size}
       height={size}
-      className="rounded-full border border-gray-600 bg-gray-600"
+      className="select-none rounded-full border border-blueish-grey-600/80 bg-blueish-grey-600"
+      draggable={false}
       loading="lazy"
     />
   );
