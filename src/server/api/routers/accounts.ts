@@ -116,16 +116,23 @@ export const accountRouter = createTRPCRouter({
   }),
   getTokenRates: protectedProcedure.query(async ({ ctx }) => {
     // TODO: Simplify when prisma supports multiple counts in one query
-    const MAX_DAYS = 12;
+    const MAX_DAYS = 7;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const result: { id: string; data: { x: string; y: number }[] }[] = [];
-    for (let i = MAX_DAYS; i >= 0; i--) {
-      const date = new Date();
+    const dates = Array.from({ length: MAX_DAYS + 1 }).map((_, i) => {
+      const date = new Date(today);
       date.setDate(today.getDate() - i);
       date.setHours(0, 0, 0, 0);
+      return date;
+    });
 
+    const resultMap = new Map<
+      string,
+      { id: string; data: { x: string; y: number }[] }
+    >();
+
+    for (const date of dates) {
       const count = await ctx.prisma.discordToken.groupBy({
         by: ["origin"],
         where: {
@@ -141,25 +148,41 @@ export const accountRouter = createTRPCRouter({
 
       for (const entry of count) {
         entry.origin ??= "Unknown";
-
         const data = {
           x: date.toLocaleDateString("en-US").slice(0, -5),
           y: entry._count.id,
         };
-        const existing = result.find((r) => r.id === entry.origin);
-        if (existing) {
-          existing.data.push(data);
+
+        if (resultMap.has(entry.origin)) {
+          resultMap.get(entry.origin)!.data.push(data);
           continue;
         }
 
-        result.push({
+        resultMap.set(entry.origin, {
           id: entry.origin,
           data: [data],
         });
       }
     }
 
-    return result;
+    for (const [, origin] of resultMap) {
+      for (const date of dates) {
+        const dateString = date.toLocaleDateString("en-US").slice(0, -5);
+        if (!origin.data.some((d) => d.x === dateString)) {
+          const index = origin.data.findIndex((d) => new Date(d.x) > date);
+          origin.data.splice(index === -1 ? origin.data.length : index, 0, {
+            x: dateString,
+            y: 0,
+          });
+        }
+      }
+
+      origin.data.sort(
+        (a, b) => new Date(a.x).getTime() - new Date(b.x).getTime(),
+      );
+    }
+
+    return [...resultMap.values()];
   }),
   createOrUpdate: publicProcedure
     .input(

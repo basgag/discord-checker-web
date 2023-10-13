@@ -1,4 +1,9 @@
-import { type Account, useAccountStore, useTokenStore } from "~/lib/store";
+import {
+  type Account,
+  useAccountStore,
+  useSettingsStore,
+  useTokenStore,
+} from "~/lib/store";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { FiExternalLink, FiStopCircle } from "react-icons/fi";
@@ -16,6 +21,7 @@ export default function Check() {
   const { tokens, removeToken } = useTokenStore();
   const { accounts, addAccount, existsByUserId, addTokenByUserId } =
     useAccountStore();
+  const { settings } = useSettingsStore();
 
   const utils = api.useContext();
 
@@ -34,14 +40,16 @@ export default function Check() {
 
         removeToken(token);
 
-        const cachedAccount =
-          await utils.accounts.getCachedByToken.fetch(token);
-        if (cachedAccount) {
-          addAccount({
-            user: cachedAccount,
-            tokens: [token],
-          } as unknown as Account);
-          return;
+        if (settings.enableCache) {
+          const cachedAccount =
+            await utils.accounts.getCachedByToken.fetch(token);
+          if (cachedAccount) {
+            addAccount({
+              user: cachedAccount,
+              tokens: [token],
+            } as unknown as Account);
+            return;
+          }
         }
 
         const base64Id = token.split(".")[0];

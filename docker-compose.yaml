@@ -60,7 +60,7 @@ services:
     networks:
       - db-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-U", "postgres", "-d", "dtc-web"]
+      test: ["CMD-SHELL", "pg_isready -d dtc-web -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5

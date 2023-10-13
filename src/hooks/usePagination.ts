@@ -1,12 +1,12 @@
 import { useState } from "react";
 
-export function usePagination() {
+export function usePagination(increment = 21) {
   const [pageIndex, setPageIndex] = useState<number>(0);
 
   const previousPage = () =>
-    setPageIndex(pageIndex - 21 < 0 ? 0 : pageIndex - 21);
+    setPageIndex(pageIndex - increment < 0 ? 0 : pageIndex - increment);
 
-  const nextPage = () => setPageIndex(pageIndex + 21);
+  const nextPage = () => setPageIndex(pageIndex + increment);
 
   const resetPage = () => setPageIndex(0);
 

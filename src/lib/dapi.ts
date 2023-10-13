@@ -74,9 +74,10 @@ export async function apiRequest<ReturnType>(
   } catch (err) {
     if (err instanceof AxiosError) {
       if (err.response && err.response.status === 429) {
+        const retryAfter = Number(err.response.headers["Retry-After"] ?? 5);
         return await apiRequest(uri, {
           ...config,
-          delay: 5000,
+          delay: retryAfter * 1000,
         });
       }
     }

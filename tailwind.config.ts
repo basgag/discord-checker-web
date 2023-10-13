@@ -24,9 +24,6 @@ export default {
         "blurple-dark": "#454FBF",
         "blurple-legacy": "#7289DA",
       },
-      maxWidth: {
-        "8xl": "90rem",
-      },
       fontFamily: {
         sans: ["var(--font-poppins)", ...fontFamily.sans],
       },

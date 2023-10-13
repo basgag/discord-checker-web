@@ -4,23 +4,52 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 interface TokenState {
   tokens: string[];
-  addTokens: (tokens: string[]) => void;
+  addTokens: (tokens: string[], excludeDuplicates?: boolean) => void;
   removeToken: (token: string) => void;
-  setTokens: (tokens: string[]) => void;
+  setTokens: (tokens: string[], excludeDuplicates?: boolean) => void;
   filterByRegex: (regex: RegExp) => void;
+  removeDuplicates: () => void;
 }
+
+const removeTokenDuplicates = (tokens: string[]) => {
+  const seen = new Set<string>();
+  return tokens.filter((token) => {
+    const [firstPart] = token.split(".");
+    if (!firstPart) {
+      return false;
+    }
+
+    if (seen.has(firstPart)) {
+      return false;
+    }
+    seen.add(firstPart);
+    return true;
+  });
+};
 
 export const useTokenStore = create<TokenState>((set) => ({
   tokens: [],
-  addTokens: (tokens: string[]) =>
-    set((state) => ({ tokens: [...new Set([...state.tokens, ...tokens])] })),
+  addTokens: (tokens: string[], excludeDuplicates = false) =>
+    set((state) => ({
+      tokens: !excludeDuplicates
+        ? [...new Set([...state.tokens, ...tokens])]
+        : removeTokenDuplicates([...new Set([...state.tokens, ...tokens])]),
+    })),
   removeToken: (token: string) =>
     set((state) => ({ tokens: state.tokens.filter((t) => t !== token) })),
-  setTokens: (tokens: string[]) =>
-    set(() => ({ tokens: [...new Set(tokens)] })),
+  setTokens: (tokens: string[], excludeDuplicates = false) =>
+    set(() => ({
+      tokens: !excludeDuplicates
+        ? [...new Set(tokens)]
+        : removeTokenDuplicates([...new Set(tokens)]),
+    })),
   filterByRegex: (regex: RegExp) =>
     set((state) => ({
       tokens: state.tokens.filter((token) => !!token.match(regex)),
+    })),
+  removeDuplicates: () =>
+    set((state) => ({
+      tokens: removeTokenDuplicates(state.tokens),
     })),
 }));
 
@@ -96,6 +125,8 @@ interface SettingsState {
   settings: {
     delay: number;
     includeLegacy: boolean;
+    enableCache: boolean;
+    removeDuplicates: boolean;
   };
   setSettings: (settings: SettingsState["settings"]) => void;
   setValue: (
@@ -104,12 +135,14 @@ interface SettingsState {
   ) => void;
 }
 
-export const useSettingsStore = create<SettingsState>((set) => ({
+export const useSettingsStore = create<SettingsState>((set, get) => ({
   settings: {
     delay: 0,
     includeLegacy: true,
+    enableCache: true,
+    removeDuplicates: true,
   },
   setSettings: (settings) => set(() => ({ settings })),
   setValue: (key, value) =>
-    set((state) => ({ settings: { ...state.settings, [key]: value } })),
+    set({ settings: { ...get().settings, [key]: value } }),
 }));

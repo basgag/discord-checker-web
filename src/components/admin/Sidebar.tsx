@@ -1,133 +1,214 @@
-import {
-  FiLogOut,
-  FiMenu,
-  FiPieChart,
-  FiSettings,
-  FiUsers,
-  FiX,
-} from "react-icons/fi";
+import { useSession } from "next-auth/react";
+import { FiChevronDown, FiHome, FiSettings, FiUsers } from "react-icons/fi";
 import Link from "next/link";
-import { useState } from "react";
-import clsx from "clsx";
 import { useRouter } from "next/router";
+import clsx from "clsx";
+import { type IconType } from "react-icons";
+import { useState } from "react";
+import Box from "~/components/common/BoxComponent";
+import UserAvatar from "~/components/admin/common/UserAvatar";
 import { SiDiscord } from "react-icons/si";
-import Image from "next/image";
 
-import { signOut, useSession } from "next-auth/react";
+interface SidebarItem {
+  name: string;
+  icon: IconType;
+  href: string;
+  subItems?: {
+    name: string;
+    href: string;
+  }[];
+}
 
-const iconStyle =
-  "h-6 w-6 flex-shrink-0 text-gray-400 transition duration-75 group-hover:text-white";
+type SidebarItemList = SidebarItem[];
 
-const routes = [
+const adminItems: SidebarItemList = [
   {
     name: "Dashboard",
+    icon: FiHome,
     href: "/admin/dashboard",
-    icon: <FiPieChart className={iconStyle} />,
   },
   {
-    name: "Accounts",
+    name: "Discord Accounts",
+    icon: SiDiscord,
     href: "/admin/accounts",
-    icon: <SiDiscord className={iconStyle} />,
   },
   {
     name: "Users",
+    icon: FiUsers,
     href: "/admin/users",
-    icon: <FiUsers className={iconStyle} />,
   },
   {
     name: "Settings",
+    icon: FiSettings,
     href: "/admin/settings",
-    icon: <FiSettings className={iconStyle} />,
+    subItems: [
+      {
+        name: "General",
+        href: "/admin/settings/general",
+      },
+      {
+        name: "Checker Settings",
+        href: "/admin/settings/checker",
+      },
+    ],
   },
 ];
 
-const Sidebar: React.FC = () => {
-  const [isOpened, setOpened] = useState(false);
+const sections = [
+  {
+    name: "Management",
+    items: adminItems,
+  },
+];
+
+const SubmenuItem: React.FC<SidebarItem> = ({
+  name,
+  icon: Icon,
+  subItems,
+  href,
+}) => {
   const router = useRouter();
-  const { data: auth } = useSession();
+  const isActive = router.pathname.startsWith(href);
+  const [isOpened, setOpened] = useState(isActive);
 
   return (
     <>
       <button
-        onClick={() => setOpened(!isOpened)}
-        className="ml-3 mt-2 inline-flex items-center rounded-lg p-2 text-sm text-gray-400 hover:bg-gray-700 focus:outline-none focus:ring-gray-200 2xl:hidden"
-      >
-        <span className="sr-only">Open sidebar</span>
-        <FiMenu className="h-6 w-6" />
-      </button>
-
-      <aside
         className={clsx(
-          "fixed left-0 top-0 z-40 h-screen w-64 transition-transform 2xl:translate-x-0",
-          !isOpened && "-translate-x-full"
+          "group inline-flex w-full items-center space-x-3 border-l-2 border-transparent px-4 py-2 transition duration-200 hover:bg-blueish-grey-600 focus:outline-none",
+          (isActive || isOpened) && "!border-blurple bg-blueish-grey-600/60",
         )}
-        aria-label="Sidebar"
+        onClick={() => setOpened(!isOpened)}
       >
-        <div className="relative h-full overflow-y-auto bg-gray-800 px-3 py-4">
-          <div className="flex justify-end">
-            <button
-              onClick={() => setOpened(!isOpened)}
-              className="mb-2 inline-flex items-center rounded-lg p-2 text-sm text-gray-400 hover:bg-gray-700 focus:outline-none focus:ring-gray-200 2xl:hidden"
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Icon className="h-auto w-5 flex-shrink-0 text-blurple" />
+            <span
+              className={clsx(
+                "truncate font-normal text-neutral-200 transition duration-200 group-hover:text-neutral-100",
+                isActive && "!text-neutral-100",
+              )}
             >
-              <span className="sr-only">Close sidebar</span>
-              <FiX className="h-6 w-6" />
-            </button>
-          </div>
-
-          <div className="mb-4 flex items-center rounded-lg border border-gray-600 bg-gray-700 px-1 py-2">
-            <Image
-              src={auth?.user?.image ?? "/images/default_user.png"}
-              width={48}
-              height={48}
-              alt="User Avatar"
-              className="mr-2 rounded-full border border-gray-600"
-            />
-            <div className="flex flex-col">
-              <span className="text-sm font-bold">{auth?.user?.name}</span>
-              <span className="text-xs font-light text-gray-300">
-                {auth?.user.id}
-              </span>
-            </div>
-          </div>
-
-          <ul className="space-y-2 font-medium">
-            {routes.map((route) => {
-              const isActive = router.pathname.startsWith(route.href);
-              return (
-                <li key={`r-${route.href}`}>
-                  <Link
-                    href={route.href}
-                    className={clsx(
-                      "flex items-center rounded-lg border border-transparent p-2 text-white hover:bg-gray-700",
-                      isActive && "!border-gray-600 bg-gray-700"
-                    )}
-                  >
-                    {route.icon}
-                    <span className="ml-3">{route.name}</span>
-                  </Link>
-                </li>
-              );
-            })}
-            <hr className="border-gray-600" />
-            <li>
-              <button
-                className="flex w-full items-center rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                onClick={() => void signOut()}
-              >
-                <FiLogOut className="h-6 w-6" />
-                <span className="ml-3">Logout</span>
-              </button>
-            </li>
-          </ul>
-
-          <div className="absolute bottom-2 mx-auto">
-            <span className="text-xs text-gray-400">
-              Coded with ❤️ by masterjanic
+              {name}
             </span>
           </div>
+
+          <FiChevronDown
+            className={clsx(
+              "h-5 w-5 transition duration-200",
+              isOpened && "rotate-180 text-blurple",
+            )}
+          />
         </div>
-      </aside>
+      </button>
+      {isOpened && (
+        <div className="!mt-0 flex flex-col space-y-1.5 border-l-2 border-blurple bg-blueish-grey-600/60 pb-1.5 pl-12 pr-4 pt-1">
+          {subItems?.map(({ name, href }) => {
+            return (
+              <Link
+                href={href}
+                key={`sub-cpl-${name.toLowerCase()}`}
+                className="text-base font-light text-neutral-200 transition duration-200 hover:text-neutral-100"
+              >
+                {name}
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </>
+  );
+};
+
+const SkeletonProfile: React.FC = () => {
+  return (
+    <div className="flex items-center space-x-3 p-4">
+      <div className="inline-flex">
+        <div className="pointer-events-none inline-block h-10 w-10 select-none">
+          <div className="h-full w-full flex-shrink-0 animate-pulse rounded-full bg-blueish-grey-600/80"></div>
+        </div>
+      </div>
+      <div className="truncate">
+        <div className="h-4 w-36 animate-pulse rounded bg-blueish-grey-600/80"></div>
+        <div className="mt-1 h-3 w-44 animate-pulse rounded bg-blueish-grey-600/80"></div>
+      </div>
+    </div>
+  );
+};
+
+const Sidebar: React.FC = () => {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  return (
+    <div className="gap-6 md:sticky md:top-24 md:col-span-3 lg:col-span-2 xl:col-span-1">
+      <Box className="divide-y divide-blueish-grey-600/80 !p-0">
+        {status === "loading" ? (
+          <SkeletonProfile />
+        ) : (
+          <div className="flex items-center space-x-3 p-4">
+            <div className="inline-flex">
+              <div className="pointer-events-none inline-block h-10 w-10 select-none">
+                <UserAvatar />
+              </div>
+            </div>
+            <div className="truncate">
+              <h3 className="truncate text-base font-medium">
+                {session?.user?.name ?? "Kein Anzeigename"}
+              </h3>
+              <p className="truncate text-xs font-light text-neutral-200">
+                ID: {session?.user.id}
+              </p>
+            </div>
+          </div>
+        )}
+        <div className="space-y-3 py-3">
+          {sections.map(({ name, items }, index) => {
+            return (
+              <div key={`sidebar-section-${index}`}>
+                <p className="px-4 text-xs font-light uppercase text-neutral-200">
+                  {name}
+                </p>
+                <div className="space-y-1 pt-3">
+                  {items.map((item, index) => {
+                    if ("subItems" in item) {
+                      return (
+                        <SubmenuItem
+                          key={`sidebar-submenu-${index}`}
+                          {...item}
+                        />
+                      );
+                    }
+
+                    const { name, icon: Icon, href } = item;
+                    const isActive = router.pathname.startsWith(href);
+                    return (
+                      <Link
+                        href={href}
+                        key={`cpl-${name.toLowerCase()}`}
+                        className={clsx(
+                          "group inline-flex w-full items-center space-x-3 border-l-2 border-transparent px-4 py-2 transition duration-200 hover:bg-blueish-grey-600 focus:outline-none",
+                          isActive && "!border-blurple bg-blueish-grey-600/60",
+                        )}
+                      >
+                        <Icon className="h-auto w-5 flex-shrink-0 text-blurple" />
+                        <span className="truncate font-normal text-neutral-200 transition duration-200 group-hover:text-neutral-100">
+                          {name}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+
+          <p className="px-4 text-xs font-light text-neutral-300">
+            Coded by masterjanic
+          </p>
+        </div>
+      </Box>
+    </div>
   );
 };
 

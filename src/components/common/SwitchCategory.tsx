@@ -5,12 +5,14 @@ import { type ElementType } from "react";
 interface ISwitchCategoryProps extends SwitchProps<ElementType> {
   name: string;
   description: string;
+  isNew?: boolean;
 }
 
 const SwitchCategory: React.FC<ISwitchCategoryProps> = ({
   name,
   description,
   checked,
+  isNew,
   ...props
 }) => {
   return (
@@ -32,7 +34,14 @@ const SwitchCategory: React.FC<ISwitchCategoryProps> = ({
           />
         </Switch>
         <Switch.Label className="ml-4 flex flex-col space-y-1">
-          <span className="text-base font-medium">{name}</span>
+          <div className="flex items-center space-x-2">
+            <span className="text-base font-medium">{name}</span>
+            {isNew && (
+              <span className="inline-flex items-center justify-center rounded-full bg-blurple px-2 py-1 text-xs font-medium leading-none text-white">
+                New
+              </span>
+            )}
+          </div>
           <span className="text-sm font-light text-neutral-300">
             {description}
           </span>

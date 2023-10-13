@@ -50,7 +50,7 @@ const PaginatedAccounts: React.FC<TPaginatedAccountsProps> = ({ ...props }) => {
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
   const { pageIndex, nextPage, previousPage, resetPage } = usePagination();
-  const { accounts } = useAccountStore();
+  const { accounts, removeAccount } = useAccountStore();
 
   const filteredAccounts = useMemo(() => {
     const currentCategory = categories[selectedCategory];
@@ -119,6 +119,7 @@ const PaginatedAccounts: React.FC<TPaginatedAccountsProps> = ({ ...props }) => {
                       account={account}
                       key={`t-${panelIndex}-${index}-${account.user.id}`}
                       onClick={() => setSelectedAccount(account)}
+                      onDeleted={() => removeAccount(account)}
                     />
                   ))}
               </Tab.Panel>

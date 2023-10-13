@@ -3,7 +3,11 @@ import { getServerAuthSession } from "~/server/auth";
 import AdminLayout from "~/layouts/AdminLayout";
 
 export default function Settings() {
-  return <AdminLayout></AdminLayout>;
+  return (
+    <AdminLayout heading="Settings">
+      <div className="grid grid-cols-12 gap-6"></div>
+    </AdminLayout>
+  );
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {

@@ -4,13 +4,8 @@ import AdminLayout from "~/layouts/AdminLayout";
 
 export default function Users() {
   return (
-    <AdminLayout>
-      <div className="pb-5 leading-[15px]">
-        <h1 className="text-3xl font-bold">User Management</h1>
-        <span className="text-neutral-300">
-          Manage which users can access the admin panel
-        </span>
-      </div>
+    <AdminLayout heading="User Management">
+      <div className="grid grid-cols-12 gap-6"></div>
     </AdminLayout>
   );
 }
