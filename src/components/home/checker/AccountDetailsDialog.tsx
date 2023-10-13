@@ -106,22 +106,24 @@ const AccountDetailsDialog: React.FC<IAccountDetailsDialogProps> = ({
         <div className="rounded border border-blueish-grey-600 bg-blueish-grey-700/80 p-1 text-sm font-light">
           {account.tokens.map((token, index) => (
             <div key={`${account.user.id}-token-${index}`} className="truncate">
-              <input name="token" type="hidden" value={token} />
               <span className="mb-1">{token}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <Modal.ActionRow>
-        <Button name="fast-login" className="mt-6">
-          <FiLogIn className="h-5 w-5" />
-          <span>Fast Login</span>
-        </Button>
-        <p className="mt-4 text-xs text-neutral-300">
-          Requires the Chrome extension to be installed.
-        </p>
-      </Modal.ActionRow>
+      {account.tokens.length > 0 && (
+        <Modal.ActionRow>
+          <input name="token" type="hidden" value={account.tokens[0]} />
+          <Button name="fast-login" className="mt-6">
+            <FiLogIn className="h-5 w-5" />
+            <span>Fast Login</span>
+          </Button>
+          <p className="mt-4 text-xs text-neutral-300">
+            Requires the Chrome extension to be installed.
+          </p>
+        </Modal.ActionRow>
+      )}
     </Modal>
   );
 };
