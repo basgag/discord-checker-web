@@ -1,16 +1,10 @@
 #!/usr/bin/env python
 
 import asyncio
-import sys
 from datetime import datetime, timedelta
-from os import system
 
 import aiohttp
 from prisma import Prisma
-
-
-def cls() -> None:
-    return system('clear')
 
 
 class TokenCheker:
@@ -33,7 +27,7 @@ class TokenCheker:
         return {"authorization": token}
 
     async def check_token(self, token: str) -> None:
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(limit=200)) as session:
             async with session.get(f"{self.discord_api}/users/@me", headers=self.headers(token)) as r:
                 account = await self.db.discordaccount.find_first(where={"tokens": {"some": {"value": token}}},
                                                                   include={"tokens": True})
@@ -50,9 +44,8 @@ class TokenCheker:
                                 del user[key]
 
                         await self.db.discordaccount.update(where={"id": account.id}, data={**user})
-                        await self.db.discordtoken.update(where={"value": token}, data={"lastCheckedAt": datetime.now()})
-
-                        print(user)
+                        await self.db.discordtoken.update(where={"value": token},
+                                                          data={"lastCheckedAt": datetime.now()})
 
                     self.counter_working += 1
                     return
@@ -75,11 +68,10 @@ class TokenCheker:
         print("Total tokens to check: {}".format(len(tokens)))
 
         if len(tokens) == 0:
-          print("No tokens to check.")
-          exit(0)
+            print("No tokens to check.")
+            exit(0)
 
         tasks: list = []
-        cls()
         for token in [token.value for token in tokens]:
             self._requests_count += 1
 
@@ -100,7 +92,5 @@ class TokenCheker:
 
 
 if __name__ == '__main__':
-    cls()
-
     token_cheker = TokenCheker()
     asyncio.run(token_cheker._run())
