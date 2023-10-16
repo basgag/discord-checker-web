@@ -1,4 +1,5 @@
-FROM --platform=linux/amd64 python:3.9-slim
+FROM --platform=linux/amd64 python:3.9-alpine3.17
+RUN apk add --no-cache libstdc++
 
 WORKDIR /app
 
@@ -12,10 +13,10 @@ RUN prisma generate
 RUN chmod +x ./main.py && chmod +x ./run.sh
 
 # Install ps and grep
-RUN apt update && apt install cron procps grep -y
+RUN apk add --no-cache procps grep dcron busybox-suid
 
-RUN (crontab -l ; echo "*/1 * * * * cd /app && ./run.sh >> /var/log/cron.log 2>&1") | crontab
+RUN (crontab -l ; echo "*/1 * * * * cd /app && ./run.sh >> /var/log/cron.log 2>&1") | crontab -
 
 RUN touch /var/log/cron.log
 
-CMD /etc/init.d/cron start && tail -f /var/log/cron.log
+CMD crond -b -l 8 && tail -f /var/log/cron.log
