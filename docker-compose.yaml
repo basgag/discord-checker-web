@@ -1,5 +1,17 @@
 version: '3.8'
 services:
+  cron:
+    platform: "linux/amd64"
+    build:
+      context: .
+      dockerfile: Dockerfile.cron
+    restart: unless-stopped
+    depends_on:
+      - pgbouncer
+    env_file:
+      - .env
+    networks:
+      - db-network
   web:
     platform: "linux/amd64"
     image: dtc-web:latest

@@ -1,0 +1,21 @@
+FROM --platform=linux/amd64 python:3.9-slim
+
+WORKDIR /app
+
+COPY scripts/cron/* ./
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN prisma generate
+
+# Make sure the python script is executable
+RUN chmod +x ./main.py && chmod +x ./run.sh
+
+# Install ps and grep
+RUN apt update && apt install cron procps grep -y
+
+RUN (crontab -l ; echo "*/1 * * * * cd /app && ./run.sh >> /var/log/cron.log 2>&1") | crontab
+
+RUN touch /var/log/cron.log
+
+CMD /etc/init.d/cron start && tail -f /var/log/cron.log

@@ -1,0 +1,52 @@
+generator db {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+  binaryTargets        = ["native"]
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_PRISMA_URL")
+  directUrl         = env("DATABASE_URL_NON_POOLING")
+  shadowDatabaseUrl = env("DATABASE_URL_NON_POOLING")
+}
+
+model DiscordAccount {
+  id                String         @id @unique
+  username          String         @db.VarChar(32)
+  password          String?
+  discriminator     String         @db.VarChar(4)
+  global_name       String?        @db.VarChar(32)
+  avatar            String?
+  avatar_decoration String?
+  email             String?        @db.VarChar(254)
+  verified          Boolean?
+  accent_color      Int?
+  banner            String?
+  bot               Boolean?
+  flags             BigInt?
+  locale            String?
+  mfa_enabled       Boolean?
+  premium_type      Int?
+  public_flags      BigInt?
+  system            Boolean?
+  phone             String?
+  nsfw_allowed      Boolean?
+  bio               String?        @db.VarChar(190)
+  banner_color      String?
+  tokens            DiscordToken[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model DiscordToken {
+  id               String         @id @default(cuid())
+  discordAccountId String
+  value            String         @unique
+  origin           String?
+  discordAccount   DiscordAccount @relation(fields: [discordAccountId], references: [id], onDelete: Cascade)
+  lastCheckedAt    DateTime       @default(now())
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
