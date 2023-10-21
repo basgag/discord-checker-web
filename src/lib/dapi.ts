@@ -1,4 +1,7 @@
-import { type APIUser } from "discord-api-types/v10";
+import {
+  type APIUser,
+  type RESTGetAPICurrentUserGuildsResult,
+} from "discord-api-types/v10";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 
 const GATEWAY_URL = "https://discord.com/api/v10";
@@ -97,6 +100,17 @@ interface BillingCountryResponse {
 export const fetchBillingCountry = async (config: RequestConfig) => {
   return apiRequest<BillingCountryResponse>(
     "/users/@me/billing/country-code",
+    config,
+  );
+};
+
+export const fetchPaymentMethods = async (config: RequestConfig) => {
+  return apiRequest("/users/@me/billing/payment-sources", config);
+};
+
+export const fetchGuilds = async (config: RequestConfig, withCounts = true) => {
+  return apiRequest<RESTGetAPICurrentUserGuildsResult>(
+    `/users/@me/guilds?with_counts=${withCounts}`,
     config,
   );
 };

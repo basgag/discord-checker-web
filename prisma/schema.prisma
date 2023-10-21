@@ -4,10 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider          = "postgresql"
-  url               = env("DATABASE_PRISMA_URL")
-  directUrl         = env("DATABASE_URL_NON_POOLING")
-  shadowDatabaseUrl = env("DATABASE_URL_NON_POOLING")
+  provider  = "postgresql"
+  url       = env("DATABASE_PRISMA_URL")
+  directUrl = env("DATABASE_URL_NON_POOLING")
 }
 
 model DiscordAccount {
@@ -34,8 +33,25 @@ model DiscordAccount {
   bio               String?        @db.VarChar(190)
   banner_color      String?
   tokens            DiscordToken[]
+  owned_guilds      DiscordGuild[]
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
+}
+
+model DiscordGuild {
+  id                         String          @id @unique
+  owner_id                   String?
+  name                       String
+  description                String?
+  icon                       String?
+  splash                     String?
+  discovery_splash           String?
+  features                   String[]
+  approximate_member_count   Int?
+  approximate_presence_count Int?
+  owner                      DiscordAccount? @relation(fields: [owner_id], references: [id], onDelete: SetNull)
+  createdAt                  DateTime        @default(now())
+  updatedAt                  DateTime        @updatedAt
 }
 
 model DiscordToken {
